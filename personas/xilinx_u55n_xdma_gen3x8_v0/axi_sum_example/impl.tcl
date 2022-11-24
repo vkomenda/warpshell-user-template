@@ -1,4 +1,5 @@
 set script_path [file dirname [file normalize [info script]]]
+set project_path [file normalize ${script_path}/../../../]
 
 create_project -in_memory -part xcu55n-fsvh2892-2L-e
 set_property source_mgmt_mode All [current_project]
