@@ -1,6 +1,6 @@
 PROJECT_DIR=$(PWD)
 WARPSHELL=xilinx_u55n_xdma_gen3x8_v0
-PERSONA=base
+PERSONA=default
 
 edit_bd:
 	rm -rf ./build/edit/$(WARPSHELL)/$(PERSONA)/
