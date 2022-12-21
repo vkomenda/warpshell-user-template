@@ -1,3 +1,4 @@
+.gen/
 build/
 tmp/
 vivado*

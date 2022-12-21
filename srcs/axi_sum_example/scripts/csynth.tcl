@@ -16,7 +16,7 @@ config_rtl -reset control
 csynth_design
 
 if {${export_ip} == "true"} {
-    export_design -rtl verilog -format ip_catalog -output ../ip/
+    export_design -rtl verilog -format ip_catalog
 }
 
 close_solution

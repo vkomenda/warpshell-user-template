@@ -1,5 +1,5 @@
 PROJECT_DIR=$(PWD)
-WARPSHELL=xilinx_u55n_xdma_gen3x8_v0
+WARPSHELL=xilinx_u55n_xdma_gen3x8_v1
 PERSONA=default
 
 edit_bd:
@@ -9,14 +9,15 @@ edit_bd:
 	vivado -mode batch -source $(PROJECT_DIR)/personas/$(WARPSHELL)/$(PERSONA)/edit.tcl -tclargs user
 
 synth:
+	rm -rf ./build/$(WARPSHELL)/$(PERSONA)/
 	mkdir -p ./build/$(WARPSHELL)/$(PERSONA)/
 	cd ./build/$(WARPSHELL)/$(PERSONA)/; \
 	vivado -mode batch -source $(PROJECT_DIR)/personas/$(WARPSHELL)/$(PERSONA)/synth.tcl
 
-build/$(WARPSHELL)/abstract_shell.dcp:
-	mkdir -p ./build/$(WARPSHELL)/
-	cd ./build/$(WARPSHELL)/; \
-	wget --output-document=abstract_shell.dcp https://github.com/Quarky93/warpshell/releases/download/warpshell_v0/abstract_warpshell_xilinx_u55n_xdma_gen3x8.dcp
+build/xilinx_u55n_xdma_gen3x8_v1/abstract_shell.dcp:
+	mkdir -p ./build/xilinx_u55n_xdma_gen3x8_v1/
+	cd ./build/xilinx_u55n_xdma_gen3x8_v1/; \
+	wget --output-document=abstract_shell.dcp https://github.com/Quarky93/warpshell/releases/download/warpshell-beta-v1/abstract_warpshell_xilinx_u55n_xdma_gen3x8.dcp
 
 impl: build/$(WARPSHELL)/abstract_shell.dcp
 	cp ./build/$(WARPSHELL)/abstract_shell.dcp ./build/$(WARPSHELL)/$(PERSONA)/
