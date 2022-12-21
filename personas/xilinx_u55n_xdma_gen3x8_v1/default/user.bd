@@ -1077,7 +1077,7 @@
             "value": "true"
           },
           "USER_XSDB_INTF_EN": {
-            "value": "FALSE"
+            "value": "TRUE"
           }
         },
         "interface_ports": {
@@ -1436,7 +1436,8 @@
           "hbm/HBM_REF_CLK_1",
           "hbm_reset/slowest_sync_clk",
           "hbm/APB_0_PCLK",
-          "hbm/APB_1_PCLK"
+          "hbm/APB_1_PCLK",
+          "debug_bridge/clk"
         ]
       },
       "shell_axi_clk_1": {
@@ -1445,7 +1446,6 @@
           "core_clk/clk_in1",
           "smartconnect_ctrl/aclk",
           "smartconnect_dma/aclk",
-          "debug_bridge/clk",
           "shell_axi_ila/clk",
           "dummy_bram/s_axi_aclk"
         ]
