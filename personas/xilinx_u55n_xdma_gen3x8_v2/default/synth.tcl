@@ -8,15 +8,16 @@ set_property IP_REPO_PATHS ${project_path}/ [current_fileset]
 update_ip_catalog -rebuild
 
 # -- [READ FILES] -------------------------------------------------------------
-source "${script_path}/user.tcl"
+file mkdir ./user/
+file copy -force ${script_path}/user.bd ./user/user.bd
+read_bd ./user/user.bd
 # -----------------------------------------------------------------------------
 
 # -- [INCLUDE VERILOG] --------------------------------------------------------
 # read_verilog [glob ${project_path}/srcs/my_module/hdl/*.v]
 # -----------------------------------------------------------------------------
 
-# -- [CONFIGURE USER BD] ------------------------------------------------------
-cr_bd_user {}
+# -- [GENERATE BDS] -----------------------------------------------------------
 generate_target all [get_files user.bd]
 # -----------------------------------------------------------------------------
 

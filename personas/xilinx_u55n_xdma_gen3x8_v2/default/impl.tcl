@@ -16,4 +16,5 @@ phys_opt_design
 write_checkpoint -force post_route.dcp
 report_utilization -file post_route_util.txt
 report_timing_summary -file post_route_timing.txt
+write_debug_probes -force debug.ltx
 write_bitstream -cell user_partition -bin_file -force user.bit

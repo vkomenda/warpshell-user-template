@@ -10,12 +10,14 @@ update_ip_catalog -rebuild
 
 proc commit {} {
     validate_bd_design
-    puts "Writing to: $::script_path/$::bd.tcl"
-    write_bd_tcl -bd_name $::bd -no_project_wrapper -make_local -force "$::script_path/$::bd.tcl"
+    save_bd_design
+    set bd [current_bd_design]
+    puts "Writing to: $::script_path/${bd}.bd"
+    file copy -force ./${bd}/${bd}.bd $::script_path/
 }
 
-source "${script_path}/${bd}.tcl"
+file mkdir ./user/
+file copy ${script_path}/user.bd ./user/user.bd
+read_bd ./user/user.bd
 
 start_gui
-
-cr_bd_${bd} {}
