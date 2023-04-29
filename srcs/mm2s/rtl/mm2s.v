@@ -21,7 +21,9 @@
 
 
 module mm2s_ingress_fifo #(
-    parameter DATA_WIDTH = 256,
+    // Necessary condition: MM_DATA_WIDTH >= S_DATA_WIDTH
+    parameter MM_DATA_WIDTH = 256,
+    parameter S_DATA_WIDTH = 256,
     parameter FIFO_DEPTH = 1024
 ) (
     input aclk,
@@ -35,8 +37,8 @@ module mm2s_ingress_fifo #(
     input s_axi_awvalid,
     output s_axi_awready,
     // AXI4 Write Data Channel
-    input [DATA_WIDTH-1:0] s_axi_wdata,
-    input [31:0] s_axi_wstrb,
+    input [MM_DATA_WIDTH-1:0] s_axi_wdata,
+    input [(MM_DATA_WIDTH/8)-1:0] s_axi_wstrb,
     input s_axi_wlast,
     input s_axi_wvalid,
     output s_axi_wready,
@@ -46,17 +48,25 @@ module mm2s_ingress_fifo #(
     // AXIS Read
     output s_axis_tvalid,
     input s_axis_tready,
-    output [DATA_WIDTH-1:0] s_axis_tdata,
+    output [S_DATA_WIDTH-1:0] s_axis_tdata,
     // MISC
-    output [$clog2(DATA_WIDTH):0] fifo_count
+    output [$clog2(S_DATA_WIDTH):0] fifo_count
 );
+
+initial begin
+    if (MM_DATA_WIDTH < S_DATA_WIDTH) begin
+        $error("Error: AXI data width is smaller than AXIS data width");
+        $finish;
+    end
+end
+
 wire fifo_full;
 wire m_axis_tvalid;
 wire m_axis_tready;
-reg [DATA_WIDTH-1:0] m_axis_tdata;
+reg [S_DATA_WIDTH-1:0] m_axis_tdata;
 
 integer i;
-reg [(DATA_WIDTH/8)-1:0] packing;
+reg [(S_DATA_WIDTH/8)-1:0] packing;
 
 assign m_axis_tready = !fifo_full;
 assign s_axi_awready = 1;
@@ -71,7 +81,7 @@ always @(posedge aclk) begin
         packing <= 0;
     end else begin
         if (s_axi_wvalid && s_axi_wready) begin
-            for (i = 0; i < (DATA_WIDTH/8); i = i + 1) begin
+            for (i = 0; i < (S_DATA_WIDTH/8); i = i + 1) begin
                 if (s_axi_wstrb[i]) begin
                     m_axis_tdata[8 * i +: 8] <= s_axi_wdata[8 * i +: 8];
                 end
@@ -99,14 +109,14 @@ xpm_fifo_sync #(
     .FULL_RESET_VALUE(0),
     .PROG_EMPTY_THRESH(10),
     .PROG_FULL_THRESH(10),
-    .RD_DATA_COUNT_WIDTH($clog2(DATA_WIDTH) + 1),
-    .READ_DATA_WIDTH(DATA_WIDTH),
+    .RD_DATA_COUNT_WIDTH($clog2(S_DATA_WIDTH) + 1),
+    .READ_DATA_WIDTH(S_DATA_WIDTH),
     .READ_MODE("fwft"),
     .SIM_ASSERT_CHK(0),
     .USE_ADV_FEATURES("1400"),
     .WAKEUP_TIME(0),
-    .WRITE_DATA_WIDTH(DATA_WIDTH),
-    .WR_DATA_COUNT_WIDTH($clog2(DATA_WIDTH) + 1)
+    .WRITE_DATA_WIDTH(S_DATA_WIDTH),
+    .WR_DATA_COUNT_WIDTH($clog2(S_DATA_WIDTH) + 1)
 ) fifo_inst (
     .wr_clk(aclk),
     .rst(!aresetn),
@@ -122,7 +132,9 @@ xpm_fifo_sync #(
 endmodule
 
 module mm2s_egress_fifo #(
-    parameter DATA_WIDTH = 256,
+    // Necessary condition: MM_DATA_WIDTH >= S_DATA_WIDTH
+    parameter MM_DATA_WIDTH = 256,
+    parameter S_DATA_WIDTH = 256,
     parameter FIFO_DEPTH = 1024
 ) (
     input aclk,
@@ -137,7 +149,7 @@ module mm2s_egress_fifo #(
     output s_axi_arready,
     // AXI4 Read Data Channel
     output s_axi_rid,
-    output [DATA_WIDTH-1:0] s_axi_rdata,
+    output [MM_DATA_WIDTH-1:0] s_axi_rdata,
     output [1:0] s_axi_rresp,
     output s_axi_rlast,
     output s_axi_rvalid,
@@ -145,15 +157,27 @@ module mm2s_egress_fifo #(
     // AXIS Write
     input s_axis_tvalid,
     output s_axis_tready,
-    input [DATA_WIDTH-1:0] s_axis_tdata,
+    input [S_DATA_WIDTH-1:0] s_axis_tdata,
     // MISC
-    output [$clog2(DATA_WIDTH):0] fifo_count
+    output [$clog2(S_DATA_WIDTH):0] fifo_count
 );
+
+initial begin
+    if (MM_DATA_WIDTH < S_DATA_WIDTH) begin
+        $error("Error: AXI data width is smaller than AXIS data width");
+        $finish;
+    end
+end
+
+localparam PAD_LEN = MM_DATA_WIDTH - S_DATA_WIDTH;
+
 wire outstanding_full;
 wire outstanding_valid;
 wire outstanding_rd;
 wire [7:0] outstanding_data;
+wire [MM_DATA_WIDTH-1:0] s_axi_rdata_padded;
 reg [7:0] outstanding_counter;
+reg [S_DATA_WIDTH-1:0] s_axi_rdata_unpadded;
 
 wire data_fifo_full;
 wire data_fifo_valid;
@@ -166,6 +190,8 @@ assign s_axi_rresp = 2'b0;
 assign s_axi_rlast = s_axi_rvalid && s_axi_rready && outstanding_counter == 1;
 assign s_axi_rvalid = data_fifo_valid && outstanding_counter != 0;
 assign outstanding_rd = s_axi_rvalid && s_axi_rready;
+assign s_axi_rdata_padded = {{PAD_LEN{1'b0}}, s_axi_rdata_unpadded};
+assign s_axi_rdata = s_axi_rdata_padded;
 
 always @(posedge(aclk)) begin
     if (!aresetn) begin
@@ -219,14 +245,14 @@ xpm_fifo_sync #(
     .FULL_RESET_VALUE(0),
     .PROG_EMPTY_THRESH(10),
     .PROG_FULL_THRESH(10),
-    .RD_DATA_COUNT_WIDTH($clog2(DATA_WIDTH) + 1),
-    .READ_DATA_WIDTH(DATA_WIDTH),
+    .RD_DATA_COUNT_WIDTH($clog2(S_DATA_WIDTH) + 1),
+    .READ_DATA_WIDTH(S_DATA_WIDTH),
     .READ_MODE("fwft"),
     .SIM_ASSERT_CHK(0),
     .USE_ADV_FEATURES("1400"),
     .WAKEUP_TIME(0),
-    .WRITE_DATA_WIDTH(DATA_WIDTH),
-    .WR_DATA_COUNT_WIDTH($clog2(DATA_WIDTH) + 1)
+    .WRITE_DATA_WIDTH(S_DATA_WIDTH),
+    .WR_DATA_COUNT_WIDTH($clog2(S_DATA_WIDTH) + 1)
 ) data_fifo_inst (
     .wr_clk(aclk),
     .rst(!aresetn),
@@ -236,7 +262,7 @@ xpm_fifo_sync #(
     .empty(),
     .rd_en(s_axi_valid && s_axi_rready),
     .data_valid(data_fifo_valid),
-    .dout(s_axi_rdata),
+    .dout(s_axi_rdata_unpadded),
     .rd_data_count(fifo_count)
 );
 endmodule
@@ -244,6 +270,7 @@ endmodule
 // Main module containing both ingress and egress fifos and presenting a complete AXI4 slave
 // interface.
 module mm2s_ingress_egress_fifos #(
+    parameter MM_DATA_WIDTH = 256,
     parameter INGRESS_DATA_WIDTH = 256,
     parameter INGRESS_FIFO_DEPTH = 1024,
     parameter EGRESS_DATA_WIDTH = 256,
@@ -269,8 +296,8 @@ module mm2s_ingress_egress_fifos #(
     output s_axi_awready,
 
     // AXI4 Write Data Channel
-    input [INGRESS_DATA_WIDTH-1:0] s_axi_wdata,
-    input [31:0] s_axi_wstrb,
+    input [MM_DATA_WIDTH-1:0] s_axi_wdata,
+    input [(MM_DATA_WIDTH/8)-1:0] s_axi_wstrb,
     input s_axi_wlast,
     input s_axi_wvalid,
     output s_axi_wready,
@@ -295,7 +322,7 @@ module mm2s_ingress_egress_fifos #(
 
     // AXI4 Read Data Channel
     output s_axi_rid,
-    output [EGRESS_DATA_WIDTH-1:0] s_axi_rdata,
+    output [MM_DATA_WIDTH-1:0] s_axi_rdata,
     output [1:0] s_axi_rresp,
     output s_axi_rlast,
     output s_axi_rvalid,
@@ -317,7 +344,8 @@ module mm2s_ingress_egress_fifos #(
 );
 
 mm2s_ingress_fifo #(
-    .DATA_WIDTH(INGRESS_DATA_WIDTH),
+    .MM_DATA_WIDTH(MM_DATA_WIDTH),
+    .S_DATA_WIDTH(INGRESS_DATA_WIDTH),
     .FIFO_DEPTH(INGRESS_FIFO_DEPTH)
 )
 mm2s_ingress_fifo_inst
@@ -346,7 +374,8 @@ mm2s_ingress_fifo_inst
 );
 
 mm2s_egress_fifo #(
-    .DATA_WIDTH(EGRESS_DATA_WIDTH),
+    .MM_DATA_WIDTH(MM_DATA_WIDTH),
+    .S_DATA_WIDTH(EGRESS_DATA_WIDTH),
     .FIFO_DEPTH(EGRESS_FIFO_DEPTH)
 )
 mm2s_egress_fifo_inst

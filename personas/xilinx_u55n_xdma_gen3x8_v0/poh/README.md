@@ -1,7 +1,7 @@
 # Solanba Proof-of-History Persona
 COMPATIBILITY:
 ```
-xilinx_u55n_xdma_gen3x8_v0
+xilinx_u55n_xdma_gen3x8_v2
 ```
 
 User Partition Address Space
