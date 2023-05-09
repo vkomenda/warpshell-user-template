@@ -12,5 +12,5 @@ constexpr int n_layers = 3;
 using Vec_t = hlslib::DataPack<int8_t, 256>;
 using Vec_t_int = hlslib::DataPack<int16_t, 256>;
 
-void MultilayerPerceptron(const int8_t im[], int8_t out[]);
+void mnist(const int8_t im[], int8_t out[]);
 void FullyConnectedLayer(const int8_t A[], const Vec_t B[], Vec_t C[], const int8_t bias[], const int8_t scale, int K, int N, int M, int D, int W, bool relu);

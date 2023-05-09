@@ -14,7 +14,7 @@ int main() {
 
 	int8_t out[10];
 
-	MultilayerPerceptron(im, out);
+	mnist(im, out);
 
 
   return 0;

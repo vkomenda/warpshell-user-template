@@ -9,7 +9,7 @@ add_files ../hls/mnist.h
 add_files ../hls/MLP.cpp -cflags "-I."
 add_files -tb ../hls/MLP_tb.cpp -cflags "-I."
 
-set_top MultilayerPerceptron
+set_top "${name}"
 open_solution "${name}_f${freq}" -flow_target vivado -reset
 set_part {xcu55n-fsvh2892-2l-e}
 create_clock -period ${freq}MHz -name default

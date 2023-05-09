@@ -17,8 +17,6 @@ endif (APPLE)
 
 include_directories(include ${VITIS_INCLUDE_PATH})
 
-set(FREQ 450)
-
 function(add_vitis_hls_target name freq)
   add_custom_command(OUTPUT ${name}/${name}_f${freq}/syn/report/csynth.rpt COMMAND vitis_hls -f ../scripts/csynth.tcl ${name} ${freq})
   add_custom_command(OUTPUT ${name}/${name}_f${freq}/impl/export.zip COMMAND vitis_hls -f ../scripts/export.tcl ${name} ${freq} DEPENDS ${name}/${name}_f${freq}/syn/report/csynth.rpt)
@@ -26,4 +24,5 @@ function(add_vitis_hls_target name freq)
   add_custom_target(export_${name}_f${freq} DEPENDS ${name}/${name}_f${freq}/impl/export.zip)
 endfunction()
 
-add_vitis_hls_target(mnist ${FREQ})
+add_vitis_hls_target(mnist 500)
+add_vitis_hls_target(mnist 250)

@@ -53,7 +53,7 @@ void FullyConnectedLayer(const int8_t A[], const Vec_t B[], Vec_t C[], const int
 }
 
 
-void MultilayerPerceptron(const int8_t im[], int8_t out[]) {
+void mnist(const int8_t im[], int8_t out[]) {
 #pragma HLS INTERFACE m_axi port=im bundle=gmem0 offset=slave depth=7840000
 #pragma HLS INTERFACE m_axi port=out bundle=gmem1 offset=slave depth=10000
 #pragma HLS INTERFACE s_axilite port=im bundle=control
