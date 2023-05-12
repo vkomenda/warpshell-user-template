@@ -41,10 +41,10 @@ make synth
 make impl
 ```
 
-3. Start the `xdma` kernel module and adjust the `/dev` file permissions as described in Warpshell Rust crate README.
-
 
 ## Run
+
+Start the `xdma` kernel module and adjust the `/dev` file permissions as described in [Warpshell Rust crate](https://github.com/Quarky93/warpshell/tree/main/sw/rust#setup).
 
 In this directory,
 ```
