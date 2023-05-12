@@ -1,6 +1,6 @@
 PROJECT_DIR=$(PWD)
 WARPSHELL=xilinx_u55n_xdma_gen3x8_v2
-PERSONA=mnist
+PERSONA=default
 
 edit_bd:
 	rm -rf ./build/edit/$(WARPSHELL)/$(PERSONA)/
@@ -20,7 +20,6 @@ build/xilinx_u55n_xdma_gen3x8_v2/abstract_shell.dcp:
 	wget --output-document=abstract_shell.dcp https://github.com/Quarky93/warpshell/releases/download/warpshell-beta-v2/abstract_warpshell_xilinx_u55n_xdma_gen3x8.dcp
 
 impl: build/$(WARPSHELL)/abstract_shell.dcp
-	mkdir -p ./build/$(WARPSHELL)/$(PERSONA)
 	cp ./build/$(WARPSHELL)/abstract_shell.dcp ./build/$(WARPSHELL)/$(PERSONA)/
 	cd ./build/$(WARPSHELL)/$(PERSONA)/; \
 	vivado -mode batch -source $(PROJECT_DIR)/personas/$(WARPSHELL)/$(PERSONA)/impl.tcl; \

@@ -1,0 +1,14 @@
+[package]
+name = "mnist-host"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1.0.69"
+serde = "1.0.162"
+serde_derive = "1.0.162"
+thiserror = "1.0.38"
+warpshell = "0.1.0"
+warpshell-derive = "0.1.0"
